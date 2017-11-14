@@ -36,7 +36,7 @@ func TestRouter(t *testing.T) {
 	router.Handle("GET", "/user/:name", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		routed = true
 		want := url.Values{"name": []string{"gopher"}}
-		ps := r.Form
+		ps := r.Context().Value(Params).(url.Values)
 		if !reflect.DeepEqual(ps, want) {
 			t.Fatalf("wrong wildcard values: want %v, got %v", want, ps)
 		}

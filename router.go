@@ -78,6 +78,7 @@
 package httprouter
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 )
@@ -267,6 +268,14 @@ func (r *Router) allowed(path, reqMethod string) (allow string) {
 	return
 }
 
+type params struct{}
+
+var (
+	// Params is a context key that can be used to access path parameters of type
+	// url.Values on the request context.
+	Params = params{}
+)
+
 // ServeHTTP makes the router implement the http.Handler interface.
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if r.PanicHandler != nil {
@@ -277,16 +286,7 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	if root := r.trees[req.Method]; root != nil {
 		if handle, ps, tsr := root.getValue(path); handle != nil {
-			if len(ps) > 0 && req.Form == nil {
-				req.Form = make(url.Values)
-			}
-			for key, val := range ps {
-				if len(val) > 0 {
-					req.Form.Set(key, val[0])
-					continue
-				}
-				req.Form.Set(key, "")
-			}
+			req = req.WithContext(context.WithValue(req.Context(), Params, ps))
 			handle.ServeHTTP(w, req)
 			return
 		} else if req.Method != "CONNECT" && path != "/" {
