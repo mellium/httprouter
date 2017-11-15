@@ -4,6 +4,9 @@
 
 // Package httprouter is a trie based high performance HTTP request router.
 //
+// It is a fork of github.com/julienschmidt/httprouter that has been modified to
+// use the http.Handler and http.HandlerFunc types from the standard library.
+//
 // A trivial example is:
 //
 //  package main
